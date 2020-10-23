@@ -1,0 +1,180 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "background": "white",
+  "padding": 5,
+  "width": 600,
+  "height": 400,
+  "title": {
+    "text": "COVID-19 Recvory Against Deaths per Country until 15 Oct 2020",
+    "frame": "group"
+  },
+  "style": "cell",
+  "data": [
+    {
+      "name": "source_0",
+      "url": "https://raw.githubusercontent.com/prash21/FIT3179-W10-HW/main/data/covidDatasetW10.csv",
+      "format": {"type": "csv", "delimiter": ","},
+      "transform": [
+        {"type": "filter", "expr": "datum.TotalPopulation > Population_Range"},
+        {"type": "filter", "expr": "datum.TotalConfirmed > Confirmed_Range"},
+        {"type": "filter", "expr": "datum.TotalDeaths > 0"},
+        {"type": "filter", "expr": "datum.TotalRecovered > 0"},
+        {
+          "type": "formula",
+          "expr": "datum.TotalConfirmed/datum.TotalPopulation * 10000",
+          "as": "Cases per 10,000 Population"
+        },
+        {
+          "type": "filter",
+          "expr": "isValid(datum[\"TotalRecovered\"]) && isFinite(+datum[\"TotalRecovered\"]) && isValid(datum[\"TotalDeaths\"]) && isFinite(+datum[\"TotalDeaths\"]) && isValid(datum[\"TotalPopulation\"]) && isFinite(+datum[\"TotalPopulation\"])"
+        }
+      ]
+    }
+  ],
+  "signals": [
+    {
+      "name": "Population_Range",
+      "value": 0,
+      "bind": {
+        "input": "range",
+        "min": 0,
+        "max": 100000000,
+        "step": 1000000,
+        "name": "Minimum Population: "
+      }
+    },
+    {
+      "name": "Confirmed_Range",
+      "value": 0,
+      "bind": {
+        "input": "range",
+        "min": 0,
+        "max": 500000,
+        "step": 1000,
+        "name": "Minimum Confirmed Cases: "
+      }
+    }
+  ],
+  "marks": [
+    {
+      "name": "marks",
+      "type": "symbol",
+      "style": ["circle"],
+      "from": {"data": "source_0"},
+      "encode": {
+        "update": {
+          "opacity": {"value": 0.7},
+          "fill": {"scale": "color", "field": "Country/Region"},
+          "tooltip": {
+            "signal": "{\"Country/Region\": isValid(datum[\"Country/Region\"]) ? datum[\"Country/Region\"] : \"\"+datum[\"Country/Region\"], \"TotalConfirmed\": format(datum[\"TotalConfirmed\"], \",\"), \"TotalDeaths\": format(datum[\"TotalDeaths\"], \",\"), \"TotalRecovered\": format(datum[\"TotalRecovered\"], \",\"), \"TotalPopulation\": format(datum[\"TotalPopulation\"], \",\"), \"Cases per 10,000 Population\": format(datum[\"Cases per 10,000 Population\"], \".2f\")}"
+          },
+          "ariaRoleDescription": {"value": "circle"},
+          "description": {
+            "signal": "\"Recovered Cases: \" + (format(datum[\"TotalRecovered\"], \"\")) + \"; Num. of Deaths: \" + (format(datum[\"TotalDeaths\"], \"\")) + \"; Country/Region: \" + (isValid(datum[\"Country/Region\"]) ? datum[\"Country/Region\"] : \"\"+datum[\"Country/Region\"]) + \"; TotalPopulation: \" + (format(datum[\"TotalPopulation\"], \".1s\")) + \"; TotalConfirmed: \" + (format(datum[\"TotalConfirmed\"], \",\")) + \"; TotalDeaths: \" + (format(datum[\"TotalDeaths\"], \",\")) + \"; TotalRecovered: \" + (format(datum[\"TotalRecovered\"], \",\")) + \"; Cases per 10,000 Population: \" + (format(datum[\"Cases per 10,000 Population\"], \".2f\"))"
+          },
+          "x": {"scale": "x", "field": "TotalRecovered"},
+          "y": {"scale": "y", "field": "TotalDeaths"},
+          "size": {"scale": "size", "field": "TotalPopulation"},
+          "shape": {"value": "circle"}
+        }
+      }
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type": "log",
+      "domain": [1, 10000000],
+      "range": [0, {"signal": "width"}],
+      "nice": true
+    },
+    {
+      "name": "y",
+      "type": "log",
+      "domain": [1, 1000000],
+      "range": [{"signal": "height"}, 0],
+      "nice": true
+    },
+    {
+      "name": "color",
+      "type": "ordinal",
+      "domain": {"data": "source_0", "field": "Country/Region", "sort": true},
+      "range": {"scheme": "category20"}
+    },
+    {
+      "name": "size",
+      "type": "threshold",
+      "domain": [1000000, 10000000, 50000000, 100000000, 500000000],
+      "range": [10, 50, 150, 200, 300, 400]
+    }
+  ],
+  "axes": [
+    {
+      "scale": "x",
+      "orient": "bottom",
+      "tickCount": 7,
+      "gridScale": "y",
+      "grid": true,
+      "domain": false,
+      "labels": false,
+      "aria": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "ticks": false,
+      "zindex": 0
+    },
+    {
+      "scale": "y",
+      "orient": "left",
+      "tickCount": 6,
+      "gridScale": "x",
+      "grid": true,
+      "domain": false,
+      "labels": false,
+      "aria": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "ticks": false,
+      "zindex": 0
+    },
+    {
+      "scale": "x",
+      "orient": "bottom",
+      "grid": false,
+      "title": "Recovered Cases",
+      "tickCount": 7,
+      "labelFlush": true,
+      "labelOverlap": "greedy",
+      "zindex": 0
+    },
+    {
+      "scale": "y",
+      "orient": "left",
+      "grid": false,
+      "title": "Num. of Deaths",
+      "tickCount": 6,
+      "labelOverlap": "greedy",
+      "zindex": 0
+    }
+  ],
+  "legends": [
+    {
+      "format": ".1s",
+      "size": "size",
+      "labelOverlap": "greedy",
+      "symbolType": "circle",
+      "title": "TotalPopulation",
+      "encode": {
+        "symbols": {
+          "update": {
+            "fill": {"value": "black"},
+            "fillOpacity": {"value": 0.7},
+            "opacity": {"value": 0.7},
+            "stroke": {"value": "transparent"}
+          }
+        }
+      }
+    }
+  ],
+  "config": {}
+}
