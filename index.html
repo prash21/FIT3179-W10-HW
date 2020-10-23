@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Import Vega & Vega-Lite (does not have to be from CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
+  <!-- Import vega-embed -->
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+
+  <!-- CSS file -->
+  <link rel="stylesheet" href="style.css">
+
+
+<style>
+    h2 {text-align: center;}
+</style>
+
+
+
+</head>
+<body>
+<h2>Week 9 HW - Prashant Murali</h2>
+<div id="symbol_map"></div>
+
+<script type="text/javascript">
+  var spec = "https://prash21.github.io/FIT3179-W9-HW/js/symbol_map.json";
+  vegaEmbed('#symbol_map', spec).then(function(result) {
+    // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+  }).catch(console.error);
+</script>
+
+</body>
+</html>
