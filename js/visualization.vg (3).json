@@ -1,0 +1,148 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "background": "white",
+  "padding": 5,
+  "width": 800,
+  "height": 500,
+  "title": {
+    "text": "2020 Covid-19 cases around the world, up to this very day!",
+    "frame": "group"
+  },
+  "style": "cell",
+  "data": [
+    {
+      "name": "source_0",
+      "url": "https://raw.githubusercontent.com/prash21/FIT3179-W9-HW/main/js/ne_110m_admin_0_countries.json",
+      "format": {"type": "topojson", "feature": "ne_110m_admin_0_countries"}
+    },
+    {
+      "name": "source_1",
+      "url": "https://raw.githubusercontent.com/prash21/FIT3179-W9-HW/main/data/covidDataset.csv",
+      "format": {"type": "csv", "delimiter": ","},
+      "transform": [
+        {
+          "type": "formula",
+          "expr": "datum.TotalDeaths/datum.TotalPopulation * 10000",
+          "as": "Confirmed Death per 10,000 population"
+        },
+        {
+          "type": "formula",
+          "expr": "datum.TotalRecovered/datum.TotalPopulation * 10000",
+          "as": "Confirmed Recovered per 10,000 population"
+        },
+        {
+          "type": "geojson",
+          "fields": ["Long", "Lat"],
+          "signal": "layer_1_layer_0_geojson_0"
+        },
+        {
+          "type": "geopoint",
+          "projection": "projection",
+          "fields": ["Long", "Lat"],
+          "as": ["layer_1_layer_0_x", "layer_1_layer_0_y"]
+        },
+        {
+          "type": "filter",
+          "expr": "isValid(datum[\"Confirmed Recovered per 10,000 population\"]) && isFinite(+datum[\"Confirmed Recovered per 10,000 population\"]) && isValid(datum[\"Confirmed Death per 10,000 population\"]) && isFinite(+datum[\"Confirmed Death per 10,000 population\"])"
+        }
+      ]
+    }
+  ],
+  "projections": [
+    {
+      "name": "projection",
+      "size": {"signal": "[width, height]"},
+      "fit": {"signal": "[data('source_0'), layer_1_layer_0_geojson_0]"},
+      "type": "equalEarth"
+    }
+  ],
+  "marks": [
+    {
+      "name": "layer_0_marks",
+      "type": "shape",
+      "style": ["geoshape"],
+      "from": {"data": "source_0"},
+      "encode": {
+        "update": {
+          "fill": {"value": "lightgray"},
+          "stroke": {"value": "white"},
+          "ariaRoleDescription": {"value": "geoshape"}
+        }
+      },
+      "transform": [{"type": "geoshape", "projection": "projection"}]
+    },
+    {
+      "name": "layer_1_layer_0_marks",
+      "type": "symbol",
+      "style": ["circle"],
+      "from": {"data": "source_1"},
+      "encode": {
+        "update": {
+          "opacity": {"value": 0.7},
+          "tooltip": {
+            "signal": "{\"Long\": format(datum[\"Long\"], \"\"), \"Lat\": format(datum[\"Lat\"], \"\"), \"Confirmed Recovered per 10,000 population\": format(datum[\"Confirmed Recovered per 10,000 population\"], \"\"), \"Confirmed Death per 10,000 population\": format(datum[\"Confirmed Death per 10,000 population\"], \"\")}"
+          },
+          "fill": {
+            "scale": "color",
+            "field": "Confirmed Death per 10,000 population"
+          },
+          "ariaRoleDescription": {"value": "circle"},
+          "description": {
+            "signal": "\"Long: \" + (format(datum[\"Long\"], \"\")) + \"; Lat: \" + (format(datum[\"Lat\"], \"\")) + \"; Confirmed Recovered per 10,000 population: \" + (format(datum[\"Confirmed Recovered per 10,000 population\"], \"\")) + \"; Confirmed Death per 10,000 population: \" + (format(datum[\"Confirmed Death per 10,000 population\"], \"\"))"
+          },
+          "x": {"field": "layer_1_layer_0_x"},
+          "y": {"field": "layer_1_layer_0_y"},
+          "size": {
+            "scale": "size",
+            "field": "Confirmed Recovered per 10,000 population"
+          },
+          "shape": {"value": "circle"}
+        }
+      }
+    }
+  ],
+  "scales": [
+    {
+      "name": "color",
+      "type": "linear",
+      "domain": {
+        "data": "source_1",
+        "field": "Confirmed Death per 10,000 population"
+      },
+      "range": {"scheme": "reds"},
+      "interpolate": "hcl",
+      "zero": false
+    },
+    {
+      "name": "size",
+      "type": "linear",
+      "domain": [0, 300],
+      "range": [0, 361],
+      "zero": true
+    }
+  ],
+  "legends": [
+    {
+      "fill": "color",
+      "gradientLength": {"signal": "clamp(height, 64, 200)"},
+      "title": "Confirmed Death per 10,000 population",
+      "encode": {"gradient": {"update": {"opacity": {"value": 0.7}}}}
+    },
+    {
+      "size": "size",
+      "symbolType": "circle",
+      "title": "Confirmed Recovered per 10,000 population",
+      "encode": {
+        "symbols": {
+          "update": {
+            "fill": {"value": "black"},
+            "fillOpacity": {"value": 0.7},
+            "opacity": {"value": 0.7},
+            "stroke": {"value": "transparent"}
+          }
+        }
+      }
+    }
+  ],
+  "config": {}
+}
